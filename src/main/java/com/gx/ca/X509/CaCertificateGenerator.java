@@ -61,7 +61,7 @@ public class CaCertificateGenerator {
                     .getCertificate(certHolder);
 
             // 7. 保存证书到文件（PEM 格式）
-            try (FileWriter writer = new FileWriter(outputPath + "/ca_certificate.pem");
+            try (FileWriter writer = new FileWriter(outputPath + commonName + "_ca_certifacate.pem");
                  JcaPEMWriter pemWriter = new JcaPEMWriter(writer)) {
                 pemWriter.writeObject(certificate);
             }

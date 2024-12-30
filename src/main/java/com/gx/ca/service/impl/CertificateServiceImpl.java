@@ -9,6 +9,7 @@ import com.gx.ca.service.CaOperationService;
 import com.gx.ca.service.CaRequestService;
 import com.gx.ca.service.CertificateService;
 import com.gx.ca.service.CrlService;
+import com.gx.ca.utils.MyMail;
 import com.gx.ca.utils.Result;
 import org.springframework.stereotype.Service;
 
@@ -36,8 +37,18 @@ public class CertificateServiceImpl extends ServiceImpl<CertificateMapper, Certi
     CrlService crlService;
     @Resource
     CaOperationService caOperationService;
+    @Resource
+    MyMail myMail;
+
+    private String subject = "";
+
+    private String text = "";
+
+
     @Override
     public Result audit(CaRequest cr) {
+        subject = "";
+        text = "";
         //cr state0审核中，1审核成功，2审核失败
         if(cr.getState() == 1) {
             //成功
@@ -51,6 +62,7 @@ public class CertificateServiceImpl extends ServiceImpl<CertificateMapper, Certi
             ca.setUpdatedAt(new Date());
             ca.setState(0);//状态（0 代表在使用中，1代表已撤销/删除2代表过期）
 //            ca.setRequestId(2222);
+            //默认证书的有效期是7天
             ca.setExpireTime((long)7 * 24 * 60 * 60);
             long expireTimeInMillis = ca.getExpireTime() * 1000; // 转换为毫秒
             ca.setDeletedAt(new Date(ca.getUpdatedAt().getTime() + expireTimeInMillis));
@@ -59,10 +71,16 @@ public class CertificateServiceImpl extends ServiceImpl<CertificateMapper, Certi
                 caCertificateGenerator.saveAsCAFile(ca);
                 //记录日志
                 caOperationService.saveOperationOnCA(ca,0);
+                subject += "尊敬的用户，您的CA证书已下发，请登录客户端查收";
+                text += "感谢您对我们平台的信任";
+                myMail.sendSimpleMail(ca.getEmailAddress(), subject, text);
             }
         }else if(cr.getState() == 2) {
             //失败
             //不做任何操作，更新一下数据库即可
+            subject += "尊敬的用户，您的CA证书申请失败！";
+            text += "感谢您对我们平台的信任";
+            myMail.sendSimpleMail(cr.getEmailAddress(), subject, text);
             caRequestService.updateById(cr);
 //            caRequestService.removeById(cr.getId());
         }

@@ -77,8 +77,8 @@ public class MyRSA {
 
     //CA generator
 
-    public static String  CA_PUBLIC_KEY = "ca_publicKey.pem";
-    public static String CA_PRIVATE_KEY = "ca_privateKey.pem";
+    public static String  CA_PUBLIC_KEY = "CA_publicKey.pem";
+    public static String CA_PRIVATE_KEY = "CA_privateKey.pem";
     // 将密钥保存到磁盘（PEM 格式）
     public static void saveKeyToDisk(String fileName, Key key) throws IOException {
         String keyBase64 = Base64.getEncoder().encodeToString(key.getEncoded());
@@ -163,8 +163,8 @@ public class MyRSA {
             PublicKey publicKey = keyPair.getPublic();
 
             // 2. 将公钥和私钥保存到文件
-            saveKeyToDisk("privateKey.pem", privateKey);
-            saveKeyToDisk("publicKey.pem", publicKey);
+            saveKeyToDisk(CA_PRIVATE_KEY, privateKey);
+            saveKeyToDisk(CA_PUBLIC_KEY, publicKey);
 
             System.out.println("公钥和私钥已经成功生成并保存到磁盘。");
 

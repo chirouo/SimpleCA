@@ -43,10 +43,12 @@ public class CaRequestServiceImpl extends ServiceImpl<CaRequestMapper, CaRequest
     CSRGenerator csrGenerator;
     @Resource
     MyMail myMail;
+    private String subject = "";
+    private String text = "";
     @Override
     public Result register(CaRDTO caRDTO, boolean isSave) {
-        String subject = "";
-        String text = "";
+        subject = "";
+        text = "";
         if (caRDTO.getAutoGenerate() == 1) {
             try {
                 caRDTO.setPublicKey(myRSA.generateKeys().get("publicKey"));
