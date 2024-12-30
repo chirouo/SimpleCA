@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import javax.mail.MessagingException;
+
 @RestController()
 @RequestMapping("ca")
 public class CertificatesController {
@@ -29,8 +31,7 @@ public class CertificatesController {
         return caService.revocation_list();
     }
     @PostMapping("audit")
-    public Result audit(@RequestBody CaRequest cr)
-    {
+    public Result audit(@RequestBody CaRequest cr) throws MessagingException {
         return caService.audit(cr);
     }
     @PostMapping("update_ca_expeirtime")

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import javax.mail.MessagingException;
 
 @RestController()
 @RequestMapping("cr")
@@ -17,8 +18,7 @@ public class CaRequestController {
     @Resource
     private CaRequestService caRequestService;
     @PostMapping("register")
-    public Result register(@RequestBody CaRDTO caRDTO)
-    {
+    public Result register(@RequestBody CaRDTO caRDTO) throws MessagingException {
         return caRequestService.register(caRDTO, true);
     }
     @PostMapping("list")

@@ -11,10 +11,13 @@ import com.gx.ca.service.CertificateService;
 import com.gx.ca.service.CrlService;
 import com.gx.ca.utils.MyMail;
 import com.gx.ca.utils.Result;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import javax.mail.MessagingException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -43,12 +46,14 @@ public class CertificateServiceImpl extends ServiceImpl<CertificateMapper, Certi
     private String subject = "";
 
     private String text = "";
-
-
+    private String caFileName = "";
+    @Value("${files.upload.ca-path}")
+    private String filePathCA;
     @Override
-    public Result audit(CaRequest cr) {
+    public Result audit(CaRequest cr) throws MessagingException {
         subject = "";
         text = "";
+        caFileName = "";
         Integer state = cr.getState();
         cr = caRequestService.getById(cr.getId());
         cr.setState(state);
@@ -74,9 +79,10 @@ public class CertificateServiceImpl extends ServiceImpl<CertificateMapper, Certi
                 caCertificateGenerator.saveAsCAFile(ca);
                 //记录日志
                 caOperationService.saveOperationOnCA(ca,CaOperationServiceImpl.AUDIT);
-                subject += "尊敬的用户，您的CA证书已下发，请登录客户端查收";
+                subject += "尊敬的用户，您的CA申请已经通过，可自行下载邮件中的附件或登录客户端查看";
                 text += "感谢您对我们平台的信任";
-                myMail.sendSimpleMail(ca.getEmailAddress(), subject, text);
+                caFileName = ca.getCommonName().replace(".", "_") + "_ca_certifacate.pem";
+                myMail.sendFileMail(ca.getEmailAddress(), subject, text, filePathCA + caFileName);
             }
         }else if(state == CaRequest.AUDIT_FAILURE) {
             //失败
@@ -207,6 +213,7 @@ public class CertificateServiceImpl extends ServiceImpl<CertificateMapper, Certi
     @Override
     public Result operationLogs() {
         List<CaOperation> operations = caOperationService.list();
+        Collections.reverse(operations);
         return Result.ok(operations);
     }
 

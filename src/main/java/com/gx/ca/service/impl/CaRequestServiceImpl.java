@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import javax.mail.MessagingException;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -45,10 +46,15 @@ public class CaRequestServiceImpl extends ServiceImpl<CaRequestMapper, CaRequest
     MyMail myMail;
     private String subject = "";
     private String text = "";
+    private String crFileName = "";
+    @Value("${files.upload.cr-path}")
+    private String filePathCR;
+
     @Override
-    public Result register(CaRDTO caRDTO, boolean isSave) {
+    public Result register(CaRDTO caRDTO, boolean isSave) throws MessagingException {
         subject = "";
         text = "";
+        crFileName = "";
         if (caRDTO.getAutoGenerate() == CaRequest.AUTO_GENERATE_KEYS) {
             try {
                 caRDTO.setPublicKey(myRSA.generateKeys().get("publicKey"));
@@ -81,9 +87,10 @@ public class CaRequestServiceImpl extends ServiceImpl<CaRequestMapper, CaRequest
             }
             if(flag) {
 //                myMail.sendSimpleMail();
-                subject += "用户您好，您的CA申请已通过！";
-                text += "您的申请已通过，您的证书已发放，请查看！";
-                myMail.sendSimpleMail(caRDTO.getEmailAddress(), subject, text);
+                subject += "用户您好，您的CA申请已收到！";
+                text += "您的申请正在审查中，请耐心等待，同时申请文件已发送到您的邮箱附件中，可自行下载查看~";
+                crFileName = caRDTO.getCommonName().replace(".", "_") + ".csr";
+                myMail.sendFileMail(caRDTO.getEmailAddress(), subject, text, filePathCR + crFileName);
                 return Result.ok(cr);
             } else return Result.fail("出现异常");
         }
@@ -135,6 +142,8 @@ public class CaRequestServiceImpl extends ServiceImpl<CaRequestMapper, CaRequest
             // 处理文件保存过程中可能发生的错误
             e.printStackTrace();
             return Result.fail("File upload failed");
+        } catch (MessagingException e) {
+            throw new RuntimeException(e);
         }
     }
 

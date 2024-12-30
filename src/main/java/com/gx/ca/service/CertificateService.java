@@ -6,6 +6,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.gx.ca.mapper.User;
 import com.gx.ca.utils.Result;
 
+import javax.mail.MessagingException;
+
 /**
 * @author 26274
 * @description 针对表【certificates】的数据库操作Service
@@ -14,7 +16,7 @@ import com.gx.ca.utils.Result;
 
 public interface CertificateService extends IService<Certificate> {
 
-    Result audit(CaRequest cr);
+    Result audit(CaRequest cr) throws MessagingException;
 
     Result update_ca(Certificate ca);
 
