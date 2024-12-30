@@ -15,6 +15,9 @@ import lombok.Data;
 @Data
 @TableName("certificates")
 public class Certificate implements Serializable {
+    public final static int LEGAL = 0;
+    public final static int DELETED = 1;
+    public final static int EXPIRED = 2;
     /**
      * 
      */

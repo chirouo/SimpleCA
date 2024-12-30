@@ -49,7 +49,7 @@ public class CaRequestServiceImpl extends ServiceImpl<CaRequestMapper, CaRequest
     public Result register(CaRDTO caRDTO, boolean isSave) {
         subject = "";
         text = "";
-        if (caRDTO.getAutoGenerate() == 1) {
+        if (caRDTO.getAutoGenerate() == CaRequest.AUTO_GENERATE_KEYS) {
             try {
                 caRDTO.setPublicKey(myRSA.generateKeys().get("publicKey"));
                 caRDTO.setPrivateKey(myRSA.generateKeys().get("privateKey"));
@@ -94,7 +94,7 @@ public class CaRequestServiceImpl extends ServiceImpl<CaRequestMapper, CaRequest
         List<CaRequest> caRequests = new ArrayList<>();
         List<CaRequest> list = caRequestService.list();
         for (CaRequest caRequest : list) {
-            if(caRequest.getState() == 0){
+            if(caRequest.getState() == CaRequest.AUDITING){
                 caRequests.add(caRequest);
             }
         }
@@ -127,8 +127,8 @@ public class CaRequestServiceImpl extends ServiceImpl<CaRequestMapper, CaRequest
             // 如果保存成功，可以返回成功的响应
             CaRDTO caRDTO = csrParser.parserCrFile(destFile.getPath());
             caRDTO.setUserAccount(account);
-            caRDTO.setAutoGenerate(0);
-            caRDTO.setState(1);
+            caRDTO.setAutoGenerate(CaRequest.NOT_AUTO_GENERATE_KEYS);
+            caRDTO.setState(CaRequest.AUDIT_SUCCESS);
             caRDTO.setEmailAddress(emailAddress);
             return register(caRDTO, false);
         } catch (IOException e) {

@@ -49,8 +49,11 @@ public class CertificateServiceImpl extends ServiceImpl<CertificateMapper, Certi
     public Result audit(CaRequest cr) {
         subject = "";
         text = "";
+        Integer state = cr.getState();
+        cr = caRequestService.getById(cr.getId());
+        cr.setState(state);
         //cr state0审核中，1审核成功，2审核失败
-        if(cr.getState() == 1) {
+        if(state == CaRequest.AUDIT_SUCCESS) {
             //成功
             //delete cr in car 不用删除了 方便渲染是否通过审核
 //            caRequestService.removeById(cr.getId());
@@ -60,7 +63,7 @@ public class CertificateServiceImpl extends ServiceImpl<CertificateMapper, Certi
             //setTime
             ca.setCreatedAt(new Date());
             ca.setUpdatedAt(new Date());
-            ca.setState(0);//状态（0 代表在使用中，1代表已撤销/删除2代表过期）
+            ca.setState(Certificate.LEGAL);//状态（0 代表在使用中，1代表已撤销/删除2代表过期）
 //            ca.setRequestId(2222);
             //默认证书的有效期是7天
             ca.setExpireTime((long)7 * 24 * 60 * 60);
@@ -70,20 +73,20 @@ public class CertificateServiceImpl extends ServiceImpl<CertificateMapper, Certi
             if(success){
                 caCertificateGenerator.saveAsCAFile(ca);
                 //记录日志
-                caOperationService.saveOperationOnCA(ca,0);
+                caOperationService.saveOperationOnCA(ca,CaOperationServiceImpl.AUDIT);
                 subject += "尊敬的用户，您的CA证书已下发，请登录客户端查收";
                 text += "感谢您对我们平台的信任";
                 myMail.sendSimpleMail(ca.getEmailAddress(), subject, text);
             }
-        }else if(cr.getState() == 2) {
+        }else if(state == CaRequest.AUDIT_FAILURE) {
             //失败
             //不做任何操作，更新一下数据库即可
             subject += "尊敬的用户，您的CA证书申请失败！";
             text += "感谢您对我们平台的信任";
             myMail.sendSimpleMail(cr.getEmailAddress(), subject, text);
-            caRequestService.updateById(cr);
 //            caRequestService.removeById(cr.getId());
         }
+        caRequestService.updateById(cr);
         return Result.ok();
     }
 
@@ -94,13 +97,14 @@ public class CertificateServiceImpl extends ServiceImpl<CertificateMapper, Certi
         ca.setDeletedAt(new Date(ca.getUpdatedAt().getTime() + expireTimeInMillis));
         boolean success = certificateService.updateById(ca);
         if(success){
-            caOperationService.saveOperationOnCA(ca, 1);
+            caOperationService.saveOperationOnCA(ca, CaOperationServiceImpl.UPDATE_EXPIRE);
         }
         return Result.ok(ca);
     }
     @Override
     public Result deleteCa(Certificate ca) {
-        ca.setState(1);
+        ca = getById(ca);
+        ca.setState(Certificate.DELETED);
         boolean b = certificateService.updateById(ca);
         if(b) {
             Crl crl = new Crl();
@@ -108,7 +112,7 @@ public class CertificateServiceImpl extends ServiceImpl<CertificateMapper, Certi
             crl.setUpdatedAt(new Date());
             crl.setCertificateId(ca.getId());
             crlService.save(crl);
-            caOperationService.saveOperationOnCA(ca, 2);
+            caOperationService.saveOperationOnCA(ca, CaOperationServiceImpl.DELETE);
             return Result.ok("删除成功");
         }else {
             return Result.fail("删除失败");
@@ -116,7 +120,8 @@ public class CertificateServiceImpl extends ServiceImpl<CertificateMapper, Certi
     }
     @Override
     public Result recoverCa(Certificate ca) {
-        ca.setState(0);
+        ca = getById(ca.getId());
+        ca.setState(Certificate.LEGAL);
         // 假设 expireTime 是以秒为单位
         long expireTimeInSeconds = 7 * 24 * 60 * 60;  // 1天的秒数
         ca.setExpireTime(expireTimeInSeconds);
@@ -133,7 +138,7 @@ public class CertificateServiceImpl extends ServiceImpl<CertificateMapper, Certi
             queryWrapper.eq(Crl::getCertificateId, ca.getId());
             boolean success = crlService.remove(queryWrapper);
             if(success){
-                caOperationService.saveOperationOnCA(ca, 3);
+                caOperationService.saveOperationOnCA(ca, CaOperationServiceImpl.REOVERY);
             }
             return Result.ok("撤销成功");
         }else {
@@ -149,14 +154,14 @@ public class CertificateServiceImpl extends ServiceImpl<CertificateMapper, Certi
         List<Certificate> certificates = new ArrayList<>();
         List<Certificate> list = certificateService.list();
         for (Certificate certificate : list) {
-            if(certificate.getState() == 0){
+            if(certificate.getState() == Certificate.LEGAL){
                 certificates.add(certificate);
             }
         }
         return Result.ok(certificates);
     }
 
-    //撤销 删除的列表
+    //删除的列表
     @Override
     public Result revocation_list() {
         //判断是否过期
@@ -164,7 +169,7 @@ public class CertificateServiceImpl extends ServiceImpl<CertificateMapper, Certi
         List<Certificate> certificates = new ArrayList<>();
         List<Certificate> list = certificateService.list();
         for (Certificate certificate : list) {
-            if(certificate.getState() == 1){
+            if(certificate.getState() == Certificate.DELETED){
                 certificates.add(certificate);
             }
         }
@@ -179,7 +184,7 @@ public class CertificateServiceImpl extends ServiceImpl<CertificateMapper, Certi
             Date deletedAt = certificate.getDeletedAt();
             if(deletedAt.before(now)){
                 //0有效 1撤销/删除 2过期
-                certificate.setState(2);
+                certificate.setState(Certificate.EXPIRED);
                 certificates.add(certificate);
             }
         }

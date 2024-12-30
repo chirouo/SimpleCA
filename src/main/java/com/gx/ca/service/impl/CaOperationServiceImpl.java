@@ -18,10 +18,10 @@ import java.util.Date;
 public class CaOperationServiceImpl extends ServiceImpl<CaOperationMapper, CaOperation>
     implements CaOperationService{
     // 静态的 Integer 常量
-    private static final int AUDIT = 0;
-    private static final int UPDATE_EXPIRE = 1;
-    private static final int DELETE = 2;
-    private static final int REOVERY = 3;
+    public static final int AUDIT = 0;
+    public static final int UPDATE_EXPIRE = 1;
+    public static final int DELETE = 2;
+    public static final int REOVERY = 3;
     @Override
     public boolean saveOperationOnCA(Certificate ca, Integer operation){
         CaOperation caOperation = new CaOperation();

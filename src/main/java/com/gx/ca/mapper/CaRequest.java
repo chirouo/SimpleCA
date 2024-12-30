@@ -15,6 +15,12 @@ import lombok.Data;
 @Data
 @TableName("ca_requests")
 public class CaRequest implements Serializable {
+    public final static int AUDITING = 0;
+    public final static int AUDIT_SUCCESS = 1;
+    public final static int AUDIT_FAILURE = 2;
+
+    public final static int AUTO_GENERATE_KEYS = 1;
+    public final static int NOT_AUTO_GENERATE_KEYS = 0;
     /**
      * 
      */
