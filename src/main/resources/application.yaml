@@ -1,0 +1,28 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: CA
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://120.46.12.103:3306/ca?useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password: 340104200306125013
+  jackson:
+    default-property-inclusion: non_null # JSON处理时忽略非空字段
+    time-zone: Asia/Shanghai
+  mail:
+    username: 13965018720@163.com
+    password: VNrtX37JRfPscYQj
+    host: smtp.163.com
+mybatis-plus:
+  type-aliases-package: com.gx.ca.mapper # 别名扫描包
+logging:
+  level:
+    com.gx.ca: debug
+files:
+  upload:
+#    cr-path: /home/gx/CA/cr/
+#    ca-path: /home/gx/CA/ca/
+    cr-path: C:\\Users\\26274\\IdeaProjects\\CA\\
+    ca-path: C:\\Users\\26274\\IdeaProjects\\CA\\

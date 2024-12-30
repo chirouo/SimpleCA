@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gx.ca.mapper.CertificateMapper">
+
+    <resultMap id="BaseResultMap" type="com.gx.ca.mapper.Certificate">
+            <id property="id" column="id" jdbcType="INTEGER"/>
+            <result property="publicKey" column="public_key" jdbcType="VARCHAR"/>
+            <result property="createdAt" column="created_at" jdbcType="TIMESTAMP"/>
+            <result property="updatedAt" column="updated_at" jdbcType="TIMESTAMP"/>
+            <result property="deletedAt" column="deleted_at" jdbcType="TIMESTAMP"/>
+            <result property="userAccount" column="user_account" jdbcType="VARCHAR"/>
+            <result property="state" column="state" jdbcType="INTEGER"/>
+            <result property="requestId" column="request_id" jdbcType="INTEGER"/>
+            <result property="expireTime" column="expire_time" jdbcType="BIGINT"/>
+            <result property="country" column="country" jdbcType="VARCHAR"/>
+            <result property="province" column="province" jdbcType="VARCHAR"/>
+            <result property="locality" column="locality" jdbcType="VARCHAR"/>
+            <result property="organization" column="organization" jdbcType="VARCHAR"/>
+            <result property="commonName" column="common_name" jdbcType="VARCHAR"/>
+            <result property="emailAddress" column="email_address" jdbcType="VARCHAR"/>
+            <result property="organizationUnitName" column="organization_unit_name" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,public_key,created_at,
+        updated_at,deleted_at,user_account,
+        state,request_id,expire_time,
+        country,province,locality,
+        organization,common_name,email_address,
+        organization_unit_name
+    </sql>
+</mapper>
