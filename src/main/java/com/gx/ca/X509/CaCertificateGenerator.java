@@ -86,7 +86,7 @@ public class CaCertificateGenerator {
     public void saveAsCAFile(com.gx.ca.mapper.Certificate ca)
     {
         CaCertificateGenerator generator = new CaCertificateGenerator();
-        Certificate caCertificate = generator.generateCACertificate(ca.getCommonName(), ca.getCountry(), ca.getCountry(), outputPath, ca.getExpireTime());
+        Certificate caCertificate = generator.generateCACertificate(ca.getCommonName(), ca.getCountry(), ca.getCountry(), outputPath, ca.getExpireTime() * 1000);
         System.out.println("CA Certificate Generated and Saved:");
         System.out.println(caCertificate);
     }

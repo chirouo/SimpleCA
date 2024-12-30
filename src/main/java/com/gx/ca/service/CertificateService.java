@@ -26,7 +26,7 @@ public interface CertificateService extends IService<Certificate> {
 
     Result revocation_list();
 
-    Result isExpired();
+    Result expired_list();
 
     Result operationLogs();
 

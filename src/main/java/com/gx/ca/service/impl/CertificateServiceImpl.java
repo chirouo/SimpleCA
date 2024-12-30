@@ -95,6 +95,7 @@ public class CertificateServiceImpl extends ServiceImpl<CertificateMapper, Certi
     public Result update_ca(Certificate ca) {
         long expireTimeInMillis = ca.getExpireTime() * 1000; // 转换为毫秒
         ca.setDeletedAt(new Date(ca.getUpdatedAt().getTime() + expireTimeInMillis));
+        if(!isExpired(ca)) ca.setState(Certificate.LEGAL);
         boolean success = certificateService.updateById(ca);
         if(success){
             caOperationService.saveOperationOnCA(ca, CaOperationServiceImpl.UPDATE_EXPIRE);
@@ -150,7 +151,7 @@ public class CertificateServiceImpl extends ServiceImpl<CertificateMapper, Certi
     @Override
     public Result listCa() {
         //判断是否过期
-        isExpired();
+        expired_list();
         List<Certificate> certificates = new ArrayList<>();
         List<Certificate> list = certificateService.list();
         for (Certificate certificate : list) {
@@ -165,7 +166,7 @@ public class CertificateServiceImpl extends ServiceImpl<CertificateMapper, Certi
     @Override
     public Result revocation_list() {
         //判断是否过期
-        isExpired();
+        expired_list();
         List<Certificate> certificates = new ArrayList<>();
         List<Certificate> list = certificateService.list();
         for (Certificate certificate : list) {
@@ -175,20 +176,31 @@ public class CertificateServiceImpl extends ServiceImpl<CertificateMapper, Certi
         }
         return Result.ok(certificates);
     }
-    //过期的列表
-    public Result isExpired(){
-        List<Certificate> certificates = new ArrayList<>();
-        List<Certificate> list = certificateService.list();
+    private boolean isExpired(Certificate ca){
+        Date deletedAt = ca.getDeletedAt();
         Date now = new Date();
+        return deletedAt.before(now);
+    }
+    //过期的列表
+    public Result expired_list(){
+        List<Certificate> certificates = new ArrayList<>();
+        List<Certificate> update_LEGAL_BTW = new ArrayList<>();
+        List<Certificate> list = certificateService.list();
+
         for (Certificate certificate : list) {
-            Date deletedAt = certificate.getDeletedAt();
-            if(deletedAt.before(now)){
-                //0有效 1撤销/删除 2过期
-                certificate.setState(Certificate.EXPIRED);
-                certificates.add(certificate);
+            if(certificate.getState() != Certificate.DELETED){
+                if(isExpired(certificate)){
+                    //0有效 1撤销/删除 2过期
+                    certificate.setState(Certificate.EXPIRED);
+                    certificates.add(certificate);
+                }else {
+                    certificate.setState(Certificate.LEGAL);
+                    update_LEGAL_BTW.add(certificate);
+                }
             }
         }
         certificateService.updateBatchById(certificates);
+        certificateService.updateBatchById(update_LEGAL_BTW);
         return Result.ok(certificates);
     }
 
@@ -200,7 +212,7 @@ public class CertificateServiceImpl extends ServiceImpl<CertificateMapper, Certi
 
     @Override
     public Result listUserCA(User user) {
-        isExpired();
+        expired_list();
         LambdaQueryWrapper<Certificate> CAQueryWrapper = new LambdaQueryWrapper<>();
         CAQueryWrapper.eq(Certificate::getUserAccount, user.getAccount());
         //返回所有的 让前端渲染 state0 1 2 （合法 被撤回 过期）

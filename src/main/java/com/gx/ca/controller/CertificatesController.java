@@ -22,7 +22,7 @@ public class CertificatesController {
     }
     @PostMapping("expired_list")
     public  Result expired_list(){
-        return caService.isExpired();
+        return caService.expired_list();
     }
     @PostMapping("revocation_list")
     public  Result revocation_list(){
