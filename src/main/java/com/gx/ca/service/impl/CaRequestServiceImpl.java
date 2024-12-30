@@ -64,7 +64,7 @@ public class CaRequestServiceImpl extends ServiceImpl<CaRequestMapper, CaRequest
         LambdaQueryWrapper<CaRequest> caRequestWrapper = new LambdaQueryWrapper<>();
         caRequestWrapper.eq(CaRequest::getUserAccount, account);
         List<CaRequest> caRequestList = caRequestService.list(caRequestWrapper);
-        if(caRequestList.size() > 3) {
+        if(caRequestList.size() >= 3) {
             subject += "用户您好，您的CA申请被驳回!";
             text += "原因：CA申请已达上限";
             myMail.sendSimpleMail(caRDTO.getEmailAddress(), subject, text);
@@ -128,7 +128,7 @@ public class CaRequestServiceImpl extends ServiceImpl<CaRequestMapper, CaRequest
             CaRDTO caRDTO = csrParser.parserCrFile(destFile.getPath());
             caRDTO.setUserAccount(account);
             caRDTO.setAutoGenerate(CaRequest.NOT_AUTO_GENERATE_KEYS);
-            caRDTO.setState(CaRequest.AUDIT_SUCCESS);
+            caRDTO.setState(CaRequest.AUDITING);
             caRDTO.setEmailAddress(emailAddress);
             return register(caRDTO, false);
         } catch (IOException e) {

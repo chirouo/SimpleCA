@@ -22,7 +22,7 @@ logging:
     com.gx.ca: debug
 files:
   upload:
-#    cr-path: /home/gx/CA/cr/
-#    ca-path: /home/gx/CA/ca/
-    cr-path: C:\\Users\\26274\\IdeaProjects\\CA\\
-    ca-path: C:\\Users\\26274\\IdeaProjects\\CA\\
+    cr-path: /home/gx/CA/cr/
+    ca-path: /home/gx/CA/ca/
+#    cr-path: C:\\Users\\26274\\IdeaProjects\\CA\\
+#    ca-path: C:\\Users\\26274\\IdeaProjects\\CA\\

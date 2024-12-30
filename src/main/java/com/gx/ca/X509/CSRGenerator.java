@@ -9,6 +9,7 @@ import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequestBuilder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -57,6 +58,8 @@ public class CSRGenerator {
     }
     @Resource
     MyRSA myRSA;
+    @Value("${files.upload.cr-path}")
+    private  String crPath;
     public String saveCSRToFile(CaRequest cr) {
         // 添加 BouncyCastle 提供程
         Security.addProvider(new BouncyCastleProvider());
@@ -83,8 +86,7 @@ public class CSRGenerator {
                     .build(contentSigner);
 
             // 替换 CN 中的 . 为 _ 或其他字符，以便生成合法的文件名
-            filename = cr.getCommonName().replace(".", "_") + ".csr";
-
+            filename = crPath + cr.getCommonName().replace(".", "_") + ".csr";
             // 将 CSR 保存到文件
             try (FileOutputStream fos = new FileOutputStream(filename)) {
                 fos.write(csr.getEncoded());
