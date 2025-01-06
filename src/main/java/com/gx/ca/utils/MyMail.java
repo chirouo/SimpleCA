@@ -31,6 +31,7 @@ public class MyMail {
         helper.addAttachment(file.getName(), file);
         sender.send(mail);
     }
+
     public void sendSimpleMail(String to, String subject, String Text) {
         SimpleMailMessage mail = new SimpleMailMessage();
         mail.setSubject(subject);

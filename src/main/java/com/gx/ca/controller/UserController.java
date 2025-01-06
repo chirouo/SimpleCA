@@ -12,7 +12,7 @@ import javax.annotation.Resource;
 public class UserController {
     @Resource
     private UserService usersService;
-    @PostMapping("login")
+    @PostMapping("lgin")
     public Result login(@RequestBody User user)
     {
         return usersService.login(user);
